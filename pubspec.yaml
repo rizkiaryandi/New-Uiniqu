@@ -29,27 +29,23 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  audioplayers: ^1.1.1
+  cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+  flutter_html: ^2.2.1
+  http: ^0.13.5
+  just_audio: ^0.9.30
+  just_audio_mpv: ^0.1.6
+  modal_bottom_sheet: ^2.1.2
 
 dev_dependencies:
+  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^2.0.0
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
@@ -60,14 +56,126 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/quran/surah.json
+    - assets/quran/qori.json
+    - assets/quran/surah/1.json
+    - assets/quran/surah/2.json
+    - assets/quran/surah/3.json
+    - assets/quran/surah/4.json
+    - assets/quran/surah/5.json
+    - assets/quran/surah/6.json
+    - assets/quran/surah/7.json
+    - assets/quran/surah/8.json
+    - assets/quran/surah/9.json
+    - assets/quran/surah/10.json
+    - assets/quran/surah/11.json
+    - assets/quran/surah/12.json
+    - assets/quran/surah/13.json
+    - assets/quran/surah/14.json
+    - assets/quran/surah/15.json
+    - assets/quran/surah/16.json
+    - assets/quran/surah/17.json
+    - assets/quran/surah/18.json
+    - assets/quran/surah/19.json
+    - assets/quran/surah/20.json
+    - assets/quran/surah/21.json
+    - assets/quran/surah/22.json
+    - assets/quran/surah/23.json
+    - assets/quran/surah/24.json
+    - assets/quran/surah/25.json
+    - assets/quran/surah/26.json
+    - assets/quran/surah/27.json
+    - assets/quran/surah/28.json
+    - assets/quran/surah/29.json
+    - assets/quran/surah/30.json
+    - assets/quran/surah/31.json
+    - assets/quran/surah/32.json
+    - assets/quran/surah/33.json
+    - assets/quran/surah/34.json
+    - assets/quran/surah/35.json
+    - assets/quran/surah/36.json
+    - assets/quran/surah/37.json
+    - assets/quran/surah/38.json
+    - assets/quran/surah/39.json
+    - assets/quran/surah/40.json
+    - assets/quran/surah/41.json
+    - assets/quran/surah/42.json
+    - assets/quran/surah/43.json
+    - assets/quran/surah/44.json
+    - assets/quran/surah/45.json
+    - assets/quran/surah/46.json
+    - assets/quran/surah/47.json
+    - assets/quran/surah/48.json
+    - assets/quran/surah/49.json
+    - assets/quran/surah/50.json
+    - assets/quran/surah/51.json
+    - assets/quran/surah/52.json
+    - assets/quran/surah/53.json
+    - assets/quran/surah/54.json
+    - assets/quran/surah/55.json
+    - assets/quran/surah/56.json
+    - assets/quran/surah/57.json
+    - assets/quran/surah/58.json
+    - assets/quran/surah/59.json
+    - assets/quran/surah/60.json
+    - assets/quran/surah/61.json
+    - assets/quran/surah/62.json
+    - assets/quran/surah/63.json
+    - assets/quran/surah/64.json
+    - assets/quran/surah/65.json
+    - assets/quran/surah/66.json
+    - assets/quran/surah/67.json
+    - assets/quran/surah/68.json
+    - assets/quran/surah/69.json
+    - assets/quran/surah/70.json
+    - assets/quran/surah/71.json
+    - assets/quran/surah/72.json
+    - assets/quran/surah/73.json
+    - assets/quran/surah/74.json
+    - assets/quran/surah/75.json
+    - assets/quran/surah/76.json
+    - assets/quran/surah/77.json
+    - assets/quran/surah/78.json
+    - assets/quran/surah/79.json
+    - assets/quran/surah/80.json
+    - assets/quran/surah/81.json
+    - assets/quran/surah/82.json
+    - assets/quran/surah/83.json
+    - assets/quran/surah/84.json
+    - assets/quran/surah/85.json
+    - assets/quran/surah/86.json
+    - assets/quran/surah/87.json
+    - assets/quran/surah/88.json
+    - assets/quran/surah/89.json
+    - assets/quran/surah/90.json
+    - assets/quran/surah/91.json
+    - assets/quran/surah/92.json
+    - assets/quran/surah/93.json
+    - assets/quran/surah/94.json
+    - assets/quran/surah/95.json
+    - assets/quran/surah/96.json
+    - assets/quran/surah/97.json
+    - assets/quran/surah/98.json
+    - assets/quran/surah/99.json
+    - assets/quran/surah/100.json
+    - assets/quran/surah/101.json
+    - assets/quran/surah/102.json
+    - assets/quran/surah/103.json
+    - assets/quran/surah/104.json
+    - assets/quran/surah/105.json
+    - assets/quran/surah/106.json
+    - assets/quran/surah/107.json
+    - assets/quran/surah/108.json
+    - assets/quran/surah/109.json
+    - assets/quran/surah/110.json
+    - assets/quran/surah/111.json
+    - assets/quran/surah/112.json
+    - assets/quran/surah/113.json
+    - assets/quran/surah/114.json
   #   - images/a_dot_ham.jpeg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
@@ -77,6 +185,9 @@ flutter:
     - family: Poppins
       fonts:
         - asset: assets/fonts/poppins/Poppins-Regular.ttf
+    - family: Sch
+      fonts:
+        - asset: assets/fonts/uth/Std.ttf
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
