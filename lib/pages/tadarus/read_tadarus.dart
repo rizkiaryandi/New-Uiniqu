@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'package:hive/hive.dart';
+import 'package:uiniqu/models/tadarus_model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../dummy/surah_list.dart';
+
+import 'package:intl/intl.dart';
 
 class ReadTadarus extends StatefulWidget {
   const ReadTadarus(this.numberSurah);
@@ -31,8 +36,52 @@ class _ReadTadarusState extends State<ReadTadarus> {
   };
 
   int nSurah = 0;
+  FToast fToast = FToast();
+
+  Future saveTadarus(Tadarus item) async {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: Colors.white,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Icon(
+            Icons.check_circle,
+            color: Colors.grey[900],
+          ),
+          SizedBox(
+            width: 6.0,
+          ),
+          Text("Terakhir Dibaca: ${item.surah_name} ayat ${item.ayah_number}",
+              style: TextStyle(color: Colors.grey[900])),
+        ],
+      ),
+    );
+
+    var box = await Hive.openBox<Tadarus>('tadarus');
+
+    // print(box.get('last')?.surah_name);
+
+    box.put('last', item);
+
+    fToast.showToast(
+        child: toast,
+        toastDuration: Duration(seconds: 2),
+        positionedToastBuilder: (context, child) {
+          return Positioned(
+            child: child,
+            bottom: 16.0,
+            right: 16.0,
+          );
+        });
+  }
 
   void initState() {
+    fToast.init(context);
+
     this.loadSurah(widget.numberSurah);
     super.initState();
   }
@@ -152,7 +201,14 @@ class _ReadTadarusState extends State<ReadTadarus> {
                 margin: EdgeInsets.zero,
                 child: InkWell(
                   onTap: () {
-                    print("object");
+                    Navigator.pop(context);
+                    int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+                    saveTadarus(Tadarus(
+                        timestamps: timestamp.toString(),
+                        surah_name: _items["name_latin"],
+                        surah_number: nSurah,
+                        ayah_number: nAyah));
                   },
                   child: ListTile(
                     contentPadding:

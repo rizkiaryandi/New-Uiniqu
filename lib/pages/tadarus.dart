@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 // import 'package:just_audio_mpv/just_audio_mpv.dart';
 
 import 'dart:convert';
 
 import './tadarus/read_tadarus.dart' as detail;
+import 'package:uiniqu/models/tadarus_model.dart';
 
 class TadarusWidget extends StatefulWidget {
   const TadarusWidget({super.key});
@@ -21,14 +24,29 @@ class _TadarusWidgetState extends State<TadarusWidget> {
   List _itemsF = [];
   late AudioPlayer player;
 
+  Tadarus lastRead = new Tadarus(
+      timestamps: '', surah_name: '', surah_number: 0, ayah_number: 0);
+  bool isLast = false;
+
   setPlay(url) async {
     player = new AudioPlayer();
 
     await player.setUrl(url);
   }
 
+  Future getLastRead() async {
+    var box = await Hive.openBox<Tadarus>('tadarus');
+    var getLast = box.get('last');
+    print("Set Datas");
+    setState(() {
+      lastRead = getLast!.get();
+      if (getLast != null) isLast = true;
+    });
+  }
+
   void initState() {
     this.loadSurah();
+    this.getLastRead();
     super.initState();
   }
 
@@ -93,87 +111,117 @@ class _TadarusWidgetState extends State<TadarusWidget> {
 
   Widget build(BuildContext context) {
     final List surah = _items;
-    return Container(
-      child: Column(children: [
-        Padding(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: TextField(
-              onChanged: (text) {
-                List<dynamic> search(String input) {
-                  return _itemsF
-                      .where((e) =>
-                          e["nama"]
-                              .toUpperCase()
-                              .contains(input.toUpperCase()) ||
-                          e["nomor"]
-                              .toUpperCase()
-                              .contains(input.toUpperCase()))
-                      .toList();
-                }
-
-                setState(() {
-                  _items = search(text);
-                });
-              },
-              cursorColor: Colors.white,
-              decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(0),
-                  fillColor: Color.fromARGB(30, 255, 255, 255),
-                  filled: true,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none),
-                  hintText: 'Cari nama atau nomor surah',
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
-                  prefixIcon: Container(
-                    child: Icon(
-                      Icons.search,
-                      color: Colors.white,
+    return WillPopScope(
+      child: Container(
+        child: Column(children: [
+          isLast
+              ? Padding(
+                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0)),
+                    elevation: 0,
+                    color: Colors.blue,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                detail.ReadTadarus(lastRead.surah_number)));
+                      },
+                      child: ListTile(
+                        title: Text("Terakhir dibaca: "),
+                        subtitle: Text(
+                            "${lastRead.surah_name} • ${lastRead.ayah_number}"),
+                      ),
                     ),
-                    width: 16,
-                  )),
-            )),
-        Expanded(
-            child: ListView.builder(
-          itemBuilder: (context, index) {
-            return Card(
-              elevation: 0,
-              color: Colors.transparent,
-              child: new InkWell(
-                onTap: () => {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => detail.ReadTadarus(index + 1)))
-                },
-                child: ListTile(
-                  title: Text(surah[index]["nama"],
-                      style: TextStyle(fontSize: 18)),
-                  subtitle: Text((surah[index]["type"] == 'mekah'
-                          ? 'Makkiyah'
-                          : 'Madaniyah') +
-                      " • ${surah[index]["ayat"]} ayat"),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.grey[700],
-                    foregroundColor: Colors.white,
-                    child: Text(
-                        "${surah[index]["nomor"]}", // ambil karakter pertama text
-                        style: TextStyle(fontSize: 14)),
                   ),
-                  trailing: TextButton(
-                    onPressed: () {
-                      _surahMore(surah[index]);
-                    },
-                    child: Icon(
-                      Icons.more_horiz,
-                      color: Colors.white,
+                )
+              : Container(),
+          Padding(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: TextField(
+                onChanged: (text) {
+                  List<dynamic> search(String input) {
+                    return _itemsF
+                        .where((e) =>
+                            e["nama"]
+                                .toUpperCase()
+                                .contains(input.toUpperCase()) ||
+                            e["nomor"]
+                                .toUpperCase()
+                                .contains(input.toUpperCase()))
+                        .toList();
+                  }
+
+                  setState(() {
+                    _items = search(text);
+                  });
+                },
+                cursorColor: Colors.white,
+                decoration: InputDecoration(
+                    contentPadding: EdgeInsets.all(0),
+                    fillColor: Color.fromARGB(30, 255, 255, 255),
+                    filled: true,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide.none),
+                    hintText: 'Cari nama atau nomor surah',
+                    hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                    prefixIcon: Container(
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.white,
+                      ),
+                      width: 16,
+                    )),
+              )),
+          Expanded(
+              child: ListView.builder(
+            itemBuilder: (context, index) {
+              return Card(
+                elevation: 0,
+                color: Colors.transparent,
+                child: new InkWell(
+                  onTap: () => {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => detail.ReadTadarus(
+                            int.parse(surah[index]["nomor"]))))
+                  },
+                  child: ListTile(
+                    title: Text(surah[index]["nama"],
+                        style: TextStyle(fontSize: 18)),
+                    subtitle: Text((surah[index]["type"] == 'mekah'
+                            ? 'Makkiyah'
+                            : 'Madaniyah') +
+                        " • ${surah[index]["ayat"]} ayat"),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.grey[700],
+                      foregroundColor: Colors.white,
+                      child: Text(
+                          "${surah[index]["nomor"]}", // ambil karakter pertama text
+                          style: TextStyle(fontSize: 14)),
+                    ),
+                    trailing: TextButton(
+                      onPressed: () {
+                        _surahMore(surah[index]);
+                      },
+                      child: Icon(
+                        Icons.more_horiz,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
-          itemCount: surah.length,
-        ))
-      ]),
+              );
+            },
+            itemCount: surah.length,
+          ))
+        ]),
+      ),
+      onWillPop: () async {
+        this.getLastRead();
+        return false;
+      },
     );
   }
 }

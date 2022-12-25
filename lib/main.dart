@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:uiniqu/models/tadarus_model.dart';
 import './home.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart' as pathProvider;
+import 'dart:io';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  Directory directory = await pathProvider.getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
+  Hive.registerAdapter(TadarusAdapter());
+
+  // await Hive.openBox<TadarusAdapter>('tadarus');
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Uiniqu',
       theme: ThemeData(
           brightness: Brightness.dark,
           primarySwatch: Colors.blue,
