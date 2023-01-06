@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:hive/hive.dart';
-import 'package:http/http.dart' as http;
 // import 'package:just_audio_mpv/just_audio_mpv.dart';
 
 import 'dart:convert';
@@ -37,10 +36,11 @@ class _TadarusWidgetState extends State<TadarusWidget> {
   Future getLastRead() async {
     var box = await Hive.openBox<Tadarus>('tadarus');
     var getLast = box.get('last');
-    print("Set Datas");
     setState(() {
-      lastRead = getLast!.get();
-      if (getLast != null) isLast = true;
+      if (getLast != null) {
+        lastRead = getLast.get();
+        isLast = true;
+      }
     });
   }
 
@@ -125,8 +125,9 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                     child: InkWell(
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                detail.ReadTadarus(lastRead.surah_number)));
+                            builder: (context) => detail.ReadTadarus(
+                                lastRead.surah_number,
+                                lastRead.ayah_number - 1)));
                       },
                       child: ListTile(
                         title: Text("Terakhir dibaca: "),
@@ -185,7 +186,7 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                   onTap: () => {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => detail.ReadTadarus(
-                            int.parse(surah[index]["nomor"]))))
+                            int.parse(surah[index]["nomor"]), 0)))
                   },
                   child: ListTile(
                     title: Text(surah[index]["nama"],

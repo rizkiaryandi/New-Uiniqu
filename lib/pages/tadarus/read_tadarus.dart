@@ -10,15 +10,17 @@ import '../../dummy/surah_list.dart';
 import 'package:intl/intl.dart';
 
 class ReadTadarus extends StatefulWidget {
-  const ReadTadarus(this.numberSurah);
+  const ReadTadarus(this.numberSurah, this.index);
 
   @override
   State<ReadTadarus> createState() => _ReadTadarusState();
 
   final int numberSurah;
+  final int index;
 }
 
 class _ReadTadarusState extends State<ReadTadarus> {
+  dynamic itemKey = new GlobalKey();
   dynamic _items = {
     "number": "",
     "name": "",
@@ -91,10 +93,13 @@ class _ReadTadarusState extends State<ReadTadarus> {
         await rootBundle.loadString('assets/quran/surah/${numberS}.json');
     final data = await jsonDecode(jsonEncode(json.decode(response)));
 
+    // Scrollable.ensureVisible(GlobalObjectKey(widget.index).currentContext!,
+    //     duration: Duration(seconds: 1), // duration for scrolling time
+    //     alignment: .5, // 0 mean, scroll to the top, 0.5 mean, half
+    //     curve: Curves.easeInOutCubic);
     setState(() {
       _items = data['${numberS}'];
       nSurah = numberS;
-      // _items['text'].length
     });
   }
 
@@ -186,7 +191,7 @@ class _ReadTadarusState extends State<ReadTadarus> {
           alignment: Alignment.topLeft,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           color: Colors.grey[900],
-          height: 300,
+          height: 250,
           child: Column(
             children: [
               ListTile(
@@ -218,7 +223,7 @@ class _ReadTadarusState extends State<ReadTadarus> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 12, height: 1),
                     ),
-                    leading: Icon(Icons.pin_drop, size: 18),
+                    leading: Icon(Icons.book, size: 18),
                     minLeadingWidth: 0,
                   ),
                 ),
@@ -333,6 +338,7 @@ class _ReadTadarusState extends State<ReadTadarus> {
               child: ListView.builder(
                 itemBuilder: (context, index) {
                   return Card(
+                    key: GlobalObjectKey(index),
                     elevation: 0,
                     color: Colors.transparent,
                     child: new InkWell(

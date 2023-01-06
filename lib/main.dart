@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uiniqu/models/auth_model.dart';
 import 'package:uiniqu/models/tadarus_model.dart';
 import './home.dart';
 import 'package:hive/hive.dart';
@@ -9,6 +10,7 @@ Future<void> main() async {
   Directory directory = await pathProvider.getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   Hive.registerAdapter(TadarusAdapter());
+  Hive.registerAdapter(AuthModelAdapter());
 
   // await Hive.openBox<TadarusAdapter>('tadarus');
 

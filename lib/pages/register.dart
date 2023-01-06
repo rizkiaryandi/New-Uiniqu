@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 //Components
@@ -9,18 +8,16 @@ import '../components/spinnerDialog.dart';
 //Services
 import '../services/auth_service.dart';
 
-//Models
-import '../models/auth_model.dart';
-
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Register extends StatefulWidget {
+  const Register({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Register> createState() => _RegisterState();
 }
 
-class _LoginState extends State<Login> {
+class _RegisterState extends State<Register> {
   @override
+  String name = "";
   String username = "";
   String password = "";
 
@@ -31,26 +28,17 @@ class _LoginState extends State<Login> {
     super.initState();
   }
 
-  Future saveUserInfo(AuthModel item) async {
-    var box = await Hive.openBox<AuthModel>('auth');
-    box.put('userinfo', item);
-  }
-
-  void loginAction() {
-    DialogBuilder(context).showSpinnerDialog('Proses Autentikasi');
-    AuthService().loginAction({
+  void registerAction() {
+    DialogBuilder(context).showSpinnerDialog('Membuat akun Uiniqu');
+    AuthService().registerAction({
       'username': username,
-      'password': password
+      'password': password,
+      'name': name
     }).then((value) => {
           DialogBuilder(context).hideOpenDialog(),
-          (value?.token != null
-              ? {
-                  saveUserInfo(value!),
-                  toast.successToast(
-                      fToast, "Halo, selamat datang ${value.name}"),
-                  Navigator.pop(context, "toUserInfo"),
-                }
-              : toast.dangerToast(fToast, "Terjadi kesalahan saat masuk")),
+          toast.successToast(fToast, value['msg']),
+          Navigator.pop(context, "toLogin"),
+          // _openLogin(),
         });
   }
 
@@ -65,7 +53,7 @@ class _LoginState extends State<Login> {
           Padding(
             padding: EdgeInsets.only(top: 16),
             child: Text(
-              "Masuk Uiniqu",
+              "Register Akun Uiniqu",
               textAlign: TextAlign.left,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
@@ -73,8 +61,35 @@ class _LoginState extends State<Login> {
           Padding(
             padding: EdgeInsets.only(top: 4, bottom: 8),
             child: Text(
-              "Input username dan password akun anda",
+              "Cukup 1 langkah untuk membuat akun Uiniqu",
               style: TextStyle(fontSize: 12),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: TextField(
+              onChanged: (text) {
+                setState(() {
+                  name = text;
+                });
+              },
+              cursorColor: Colors.white,
+              decoration: InputDecoration(
+                  fillColor: Color.fromARGB(30, 255, 255, 255),
+                  filled: true,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide.none),
+                  hintText: 'Nama Lengkap',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+                  prefixIcon: Container(
+                    padding: EdgeInsets.only(right: 15, left: 15),
+                    child: Icon(
+                      Icons.person_pin_circle_outlined,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  )),
             ),
           ),
           Padding(
@@ -140,10 +155,10 @@ class _LoginState extends State<Login> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  loginAction();
+                  registerAction();
                 },
                 child: Text(
-                  "Masuk",
+                  "Register",
                   style: TextStyle(fontSize: 16),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -156,7 +171,7 @@ class _LoginState extends State<Login> {
           Padding(
             padding: EdgeInsets.only(top: 14, bottom: 14),
             child: Text(
-              "Belum punya akun?",
+              "Sudah punya akun?",
               style: TextStyle(fontSize: 12, color: Colors.grey[50]),
             ),
           ),
@@ -166,11 +181,10 @@ class _LoginState extends State<Login> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context, "toRegister");
-                  // _openRegister();
+                  Navigator.pop(context, "toLogin");
                 },
                 child: Text(
-                  "Register Akun Uiniqu",
+                  "Kembali ke Halaman Masuk",
                   style: TextStyle(fontSize: 14),
                 ),
                 style: ElevatedButton.styleFrom(
