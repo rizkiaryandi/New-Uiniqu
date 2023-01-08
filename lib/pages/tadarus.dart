@@ -109,6 +109,26 @@ class _TadarusWidgetState extends State<TadarusWidget> {
     );
   }
 
+  Future<void> _navigateAndDisplaySelection(
+      BuildContext context, surah_number, ayah_number, stat) async {
+    // Navigator.push returns a Future that completes after calling
+    // Navigator.pop on the Selection Screen.
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              detail.ReadTadarus(surah_number, ayah_number - 1, stat)),
+    );
+
+    // When a BuildContext is used from a StatefulWidget, the mounted property
+    // must be checked after an asynchronous gap.
+    if (!mounted) return;
+
+    // After the Selection Screen returns a result, hide any previous snackbars
+    // and show the new result.
+    this.getLastRead();
+  }
+
   Widget build(BuildContext context) {
     final List surah = _items;
     return WillPopScope(
@@ -124,10 +144,11 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                     color: Colors.blue,
                     child: InkWell(
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => detail.ReadTadarus(
-                                lastRead.surah_number,
-                                lastRead.ayah_number - 1)));
+                        _navigateAndDisplaySelection(
+                            context,
+                            lastRead.surah_number,
+                            lastRead.ayah_number - 1,
+                            true);
                       },
                       child: ListTile(
                         title: Text("Terakhir dibaca: "),
@@ -184,9 +205,8 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                 color: Colors.transparent,
                 child: new InkWell(
                   onTap: () => {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => detail.ReadTadarus(
-                            int.parse(surah[index]["nomor"]), 0)))
+                    _navigateAndDisplaySelection(
+                        context, int.parse(surah[index]["nomor"]), 0, false)
                   },
                   child: ListTile(
                     title: Text(surah[index]["nama"],

@@ -4,23 +4,29 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:uiniqu/models/tadarus_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../dummy/surah_list.dart';
 
 import 'package:intl/intl.dart';
 
 class ReadTadarus extends StatefulWidget {
-  const ReadTadarus(this.numberSurah, this.index);
+  const ReadTadarus(this.numberSurah, this.index, this.stat);
 
   @override
   State<ReadTadarus> createState() => _ReadTadarusState();
 
   final int numberSurah;
   final int index;
+  final bool stat;
 }
 
 class _ReadTadarusState extends State<ReadTadarus> {
-  dynamic itemKey = new GlobalKey();
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
+
+  int target = 0;
   dynamic _items = {
     "number": "",
     "name": "",
@@ -65,8 +71,6 @@ class _ReadTadarusState extends State<ReadTadarus> {
 
     var box = await Hive.openBox<Tadarus>('tadarus');
 
-    // print(box.get('last')?.surah_name);
-
     box.put('last', item);
 
     fToast.showToast(
@@ -85,22 +89,24 @@ class _ReadTadarusState extends State<ReadTadarus> {
     fToast.init(context);
 
     this.loadSurah(widget.numberSurah);
+
     super.initState();
   }
 
   Future<void> loadSurah(int numberS) async {
-    final String response =
-        await rootBundle.loadString('assets/quran/surah/${numberS}.json');
-    final data = await jsonDecode(jsonEncode(json.decode(response)));
+    var data;
+    rootBundle
+        .loadString('assets/quran/surah/${numberS}.json')
+        .then((response) => {
+              data = jsonDecode(jsonEncode(json.decode(response))),
+              setState(() {
+                _items = data['${numberS}'];
+                nSurah = numberS;
 
-    // Scrollable.ensureVisible(GlobalObjectKey(widget.index).currentContext!,
-    //     duration: Duration(seconds: 1), // duration for scrolling time
-    //     alignment: .5, // 0 mean, scroll to the top, 0.5 mean, half
-    //     curve: Curves.easeInOutCubic);
-    setState(() {
-      _items = data['${numberS}'];
-      nSurah = numberS;
-    });
+                target = widget.index.toInt();
+                // print(target);
+              }),
+            });
   }
 
   _actionMore(dynamic detail) {
@@ -307,71 +313,120 @@ class _ReadTadarusState extends State<ReadTadarus> {
   Widget build(BuildContext context) {
     dynamic surah = _items;
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            surah['name_latin'],
-          ),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          actions: [
-            IconButton(
-              onPressed: () {
-                _actionMore(surah);
-              },
-              icon: Icon(Icons.more_horiz),
-              iconSize: 28,
-            ),
-          ],
+      appBar: AppBar(
+        title: Text(
+          surah['name_latin'],
         ),
-        body: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.fromLTRB(18, 0, 18, 8),
-              child: Text(
-                surah['translations']['id']['name'] +
-                    " • ${surah["number_of_ayah"]} ayat",
-                style: TextStyle(fontSize: 12, color: Colors.grey[350]),
-              ),
-              width: MediaQuery.of(context).size.width,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            onPressed: () {
+              _actionMore(surah);
+            },
+            icon: Icon(Icons.more_horiz),
+            iconSize: 28,
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.fromLTRB(18, 0, 18, 8),
+            child: Text(
+              surah['translations']['id']['name'] +
+                  " • ${surah["number_of_ayah"]} ayat",
+              style: TextStyle(fontSize: 12, color: Colors.grey[350]),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemBuilder: (context, index) {
-                  return Card(
-                    key: GlobalObjectKey(index),
-                    elevation: 0,
-                    color: Colors.transparent,
-                    child: new InkWell(
-                      onTap: () => {_ayahDetail(index + 1)},
-                      child: ListTile(
-                          title: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 20),
-                            child: Text(
-                              surah['text']["${index + 1}"],
-                              style: TextStyle(
-                                  fontSize: 28, height: 2, fontFamily: 'Sch'),
-                              textAlign: TextAlign.right,
+            width: MediaQuery.of(context).size.width,
+          ),
+          Expanded(
+            child: (_items['number'].toString() !=
+                        widget.numberSurah.toString()) ||
+                    (widget.index.toInt() == 0) ||
+                    (!widget.stat)
+                ? ListView.builder(
+                    itemCount: surah['text'].length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 0,
+                        color: Colors.transparent,
+                        child: new InkWell(
+                          onTap: () => {_ayahDetail(index + 1)},
+                          child: ListTile(
+                              title: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 20),
+                                child: Text(
+                                  surah['text']["${index + 1}"],
+                                  style: TextStyle(
+                                      fontSize: 28,
+                                      height: 2,
+                                      fontFamily: 'Sch'),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                              subtitle: Text(
+                                  surah['translations']['id']['text']
+                                      ["${index + 1}"],
+                                  style: TextStyle(fontSize: 14)),
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.grey[700],
+                                foregroundColor: Colors.white,
+                                child: Text(
+                                    "${index + 1}", // ambil karakter pertama text
+                                    style: TextStyle(fontSize: 14)),
+                              )),
+                        ),
+                      );
+                    },
+                  )
+                : _items['text'].length == 0
+                    ? Container()
+                    : new ScrollablePositionedList.builder(
+                        initialScrollIndex: widget.index.toInt() + 1,
+                        itemCount: surah['text'].length,
+                        itemScrollController: itemScrollController,
+                        itemPositionsListener: itemPositionsListener,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            elevation: 0,
+                            color: index.toInt() == widget.index.toInt() + 1
+                                ? Color.fromARGB(75, 33, 149, 243)
+                                : Colors.transparent,
+                            child: new InkWell(
+                              onTap: () => {_ayahDetail(index + 1)},
+                              child: ListTile(
+                                  title: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 20),
+                                    child: Text(
+                                      surah['text']["${index + 1}"],
+                                      style: TextStyle(
+                                          fontSize: 28,
+                                          height: 2,
+                                          fontFamily: 'Sch'),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                      surah['translations']['id']['text']
+                                          ["${index + 1}"],
+                                      style: TextStyle(fontSize: 14)),
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.grey[700],
+                                    foregroundColor: Colors.white,
+                                    child: Text(
+                                        "${index + 1}", // ambil karakter pertama text
+                                        style: TextStyle(fontSize: 14)),
+                                  )),
                             ),
-                          ),
-                          subtitle: Text(
-                              surah['translations']['id']['text']
-                                  ["${index + 1}"],
-                              style: TextStyle(fontSize: 14)),
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.grey[700],
-                            foregroundColor: Colors.white,
-                            child: Text(
-                                "${index + 1}", // ambil karakter pertama text
-                                style: TextStyle(fontSize: 14)),
-                          )),
-                    ),
-                  );
-                },
-                itemCount: surah['text'].length,
-              ),
-            )
-          ],
-        ));
+                          );
+                        },
+                      ),
+          )
+        ],
+      ),
+    );
   }
 }
