@@ -392,7 +392,7 @@ class _ReadTadarusState extends State<ReadTadarus> {
                           return Card(
                             elevation: 0,
                             color: index.toInt() == widget.index.toInt() + 1
-                                ? Color.fromARGB(75, 33, 149, 243)
+                                ? Colors.grey[800]
                                 : Colors.transparent,
                             child: new InkWell(
                               onTap: () => {_ayahDetail(index + 1)},

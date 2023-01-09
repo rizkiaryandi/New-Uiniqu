@@ -10,22 +10,13 @@ class MurojaahWidget extends StatefulWidget {
 class _MurojaahWidgetState extends State<MurojaahWidget> {
   @override
   Widget build(BuildContext context) {
-    final List bulan = [
-      "Januari",
-      "Fabruari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember"
-    ];
     return Container(
-      child: Center(child: Text("Murojaah")),
+      padding: EdgeInsets.all(20),
+      child: Center(
+          child: Text(
+        "Segera hadir muroja'ah hafalan surah Al Quran nantikan update terbarunya hanya di UINIQU",
+        textAlign: TextAlign.center,
+      )),
     );
   }
 }

@@ -6,13 +6,12 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as pathProvider;
 import 'dart:io';
 
-Future<void> main() async {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   Directory directory = await pathProvider.getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   Hive.registerAdapter(TadarusAdapter());
   Hive.registerAdapter(AuthModelAdapter());
-
-  // await Hive.openBox<TadarusAdapter>('tadarus');
 
   runApp(MyApp());
 }
@@ -25,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Uiniqu',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
           brightness: Brightness.dark,
           primarySwatch: Colors.blue,

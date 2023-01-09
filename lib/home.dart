@@ -38,7 +38,11 @@ class _HomePageState extends State<HomePage>
     Future<void> future = showModalBottomSheet<void>(
         isScrollControlled: true,
         context: context,
-        builder: (BuildContext context) => Register());
+        builder: (BuildContext context) => Padding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Register(),
+            ));
 
     future.then((void value) => {
           if ({value}.toString() == '{toLogin}') _openLogin()
@@ -49,7 +53,11 @@ class _HomePageState extends State<HomePage>
     Future<void> future = showModalBottomSheet<void>(
         isScrollControlled: true,
         context: context,
-        builder: (BuildContext context) => Login());
+        builder: (BuildContext context) => Padding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Login(),
+            ));
 
     future.then((void value) => {
           if ({value}.toString() == '{toRegister}')

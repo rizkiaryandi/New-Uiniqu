@@ -141,7 +141,7 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0)),
                     elevation: 0,
-                    color: Colors.blue,
+                    color: Colors.grey[700],
                     child: InkWell(
                       onTap: () {
                         _navigateAndDisplaySelection(
