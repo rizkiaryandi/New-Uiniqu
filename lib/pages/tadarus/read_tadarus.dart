@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Libraries
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:uiniqu/models/tadarus_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../../dummy/surah_list.dart';
-
-import 'package:intl/intl.dart';
+//Variables
+import '../../variables/app.dart';
 
 class ReadTadarus extends StatefulWidget {
   const ReadTadarus(this.numberSurah, this.index, this.stat);
@@ -360,7 +361,7 @@ class _ReadTadarusState extends State<ReadTadarus> {
                                 child: Text(
                                   surah['text']["${index + 1}"],
                                   style: TextStyle(
-                                      fontSize: 28,
+                                      fontSize: 26,
                                       height: 2,
                                       fontFamily: 'Sch'),
                                   textAlign: TextAlign.right,
@@ -369,12 +370,11 @@ class _ReadTadarusState extends State<ReadTadarus> {
                               subtitle: Text(
                                   surah['translations']['id']['text']
                                       ["${index + 1}"],
-                                  style: TextStyle(fontSize: 14)),
+                                  style: TextStyle(fontSize: 12.5)),
                               leading: CircleAvatar(
                                 backgroundColor: Colors.grey[700],
                                 foregroundColor: Colors.white,
-                                child: Text(
-                                    "${index + 1}", // ambil karakter pertama text
+                                child: Text("${index + 1}",
                                     style: TextStyle(fontSize: 14)),
                               )),
                         ),

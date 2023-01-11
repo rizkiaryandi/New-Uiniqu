@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+//Libraries
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:hive/hive.dart';
-// import 'package:just_audio_mpv/just_audio_mpv.dart';
-
 import 'dart:convert';
 
+//Pages
 import './tadarus/read_tadarus.dart' as detail;
+import './tadarus/detail_search.dart' as detailSearch;
+
+//Models
 import 'package:uiniqu/models/tadarus_model.dart';
+
+//Components
+import '../components/toast.dart';
 
 class TadarusWidget extends StatefulWidget {
   const TadarusWidget({super.key});
@@ -21,16 +29,62 @@ class _TadarusWidgetState extends State<TadarusWidget> {
   @override
   List _items = [];
   List _itemsF = [];
-  late AudioPlayer player;
 
+  String playerStat = "false";
+  String playPauseStat = "play";
+  final searchController = TextEditingController();
+
+  late AudioPlayer player;
   Tadarus lastRead = new Tadarus(
       timestamps: '', surah_name: '', surah_number: 0, ayah_number: 0);
   bool isLast = false;
+  bool isDetailSearch = false;
 
-  setPlay(url) async {
-    player = new AudioPlayer();
+  FToast fToast = FToast();
 
-    await player.setUrl(url);
+  setStart(url) async {
+    if (playerStat == "false") {
+      setState(() {
+        playerStat = "loading";
+        print(playerStat);
+      });
+      player = AudioPlayer();
+      final duration = await player.setUrl(url);
+      await player
+          .play()
+          .then((_) => {
+                setState(() {
+                  playerStat = "true";
+                  playPauseStat = "pause";
+
+                  print(playerStat);
+                })
+              })
+          .catchError((_) => {
+                setState(() {
+                  playerStat = "false";
+                  playPauseStat = "pause";
+                  toast.dangerToast(
+                      fToast, "Terjadi kesalahan saat memuat audio");
+                })
+              });
+    }
+  }
+
+  void setPlay() async {
+    await player.play().then((_) => {
+          setState(() {
+            playPauseStat = "play";
+          })
+        });
+  }
+
+  void setPause() async {
+    await player.pause().then((_) => {
+          setState(() {
+            playPauseStat = "pause";
+          })
+        });
   }
 
   Future getLastRead() async {
@@ -45,6 +99,7 @@ class _TadarusWidgetState extends State<TadarusWidget> {
   }
 
   void initState() {
+    fToast.init(context);
     this.loadSurah();
     this.getLastRead();
     super.initState();
@@ -83,18 +138,36 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                   detail["arti"],
                   style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
                 ),
-                trailing: TextButton(
-                  onPressed: () {
-                    // Navigator.of(context).push(MaterialPageRoute(
-                    //   builder: (context) => audio.Audiotest(1);
+                trailing: playerStat == "false"
+                    ? TextButton(
+                        onPressed: () {
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //   builder: (context) => audio.Audiotest(1);
 
-                    setPlay(detail["audio"]);
-                  },
-                  child: Icon(
-                    Icons.play_arrow,
-                    color: Colors.white,
-                  ),
-                ),
+                          setStart(detail["audio"]);
+                        },
+                        child: Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                        ),
+                      )
+                    : playerStat == "loading"
+                        ? TextButton(onPressed: () {}, child: Text("..."))
+                        : TextButton(
+                            onPressed: () {
+                              if (playPauseStat == "play") {
+                                setPause();
+                              } else if (playPauseStat == "pause") {
+                                setPlay();
+                              }
+                            },
+                            child: Icon(
+                              playPauseStat == "play"
+                                  ? Icons.play_arrow
+                                  : Icons.pause,
+                              color: Colors.white,
+                            ),
+                          ),
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -106,13 +179,17 @@ class _TadarusWidgetState extends State<TadarusWidget> {
           ),
         );
       },
-    );
+    ).whenComplete(() => {
+          setState(() {
+            playerStat = "false";
+            playPauseStat = "play";
+          })
+        });
   }
 
   Future<void> _navigateAndDisplaySelection(
       BuildContext context, surah_number, ayah_number, stat) async {
-    // Navigator.push returns a Future that completes after calling
-    // Navigator.pop on the Selection Screen.
+    FocusScope.of(context).requestFocus(new FocusNode());
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -127,6 +204,11 @@ class _TadarusWidgetState extends State<TadarusWidget> {
     // After the Selection Screen returns a result, hide any previous snackbars
     // and show the new result.
     this.getLastRead();
+    setState(() {
+      _items = _itemsF;
+      searchController.clear();
+      isDetailSearch = false;
+    });
   }
 
   Widget build(BuildContext context) {
@@ -151,17 +233,52 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                             true);
                       },
                       child: ListTile(
-                        title: Text("Terakhir dibaca: "),
+                        title: Text("Terakhir dibaca: ",
+                            // ambil karakter pertama text
+                            style: TextStyle(fontSize: 14)),
                         subtitle: Text(
-                            "${lastRead.surah_name} • ${lastRead.ayah_number}"),
+                            "${lastRead.surah_name} • ${lastRead.ayah_number}", // ambil karakter pertama text
+                            style: TextStyle(fontSize: 12)),
                       ),
                     ),
                   ),
                 )
               : Container(),
+          (isDetailSearch == true
+              ? Container(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isDetailSearch = false;
+                        });
+
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => detailSearch.DetailSearch(),
+                            ));
+                      },
+                      child: Text(
+                        "Klik untuk pencarian lebih mendalam",
+                        style: TextStyle(fontSize: 11.4),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[800],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(9))),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.zero,
+                )),
           Padding(
               padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: TextField(
+                controller: searchController,
                 onChanged: (text) {
                   List<dynamic> search(String input) {
                     return _itemsF
@@ -179,23 +296,46 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                     _items = search(text);
                   });
                 },
+                onTap: () {
+                  setState(() {
+                    isDetailSearch = true;
+                  });
+                },
                 cursorColor: Colors.white,
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.all(0),
-                    fillColor: Color.fromARGB(30, 255, 255, 255),
-                    filled: true,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide.none),
-                    hintText: 'Cari nama atau nomor surah',
-                    hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
-                    prefixIcon: Container(
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.white,
-                      ),
-                      width: 16,
-                    )),
+                  contentPadding: EdgeInsets.all(0),
+                  fillColor: Color.fromARGB(30, 255, 255, 255),
+                  filled: true,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide.none),
+                  hintText: 'Cari nama atau nomor surah',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 13.5),
+                  prefixIcon: Container(
+                    child: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    ),
+                    width: 14,
+                  ),
+                  suffixIcon: searchController.text.length > 0
+                      ? IconButton(
+                          onPressed: () => {
+                            searchController.clear(),
+                            setState(() {
+                              _items = _itemsF;
+                              FocusScope.of(context)
+                                  .requestFocus(new FocusNode());
+                            }),
+                          },
+                          icon: Icon(
+                            Icons.clear,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(""),
+                ),
               )),
           Expanded(
               child: ListView.builder(
@@ -209,12 +349,16 @@ class _TadarusWidgetState extends State<TadarusWidget> {
                         context, int.parse(surah[index]["nomor"]), 0, false)
                   },
                   child: ListTile(
-                    title: Text(surah[index]["nama"],
-                        style: TextStyle(fontSize: 18)),
-                    subtitle: Text((surah[index]["type"] == 'mekah'
-                            ? 'Makkiyah'
-                            : 'Madaniyah') +
-                        " • ${surah[index]["ayat"]} ayat"),
+                    title: Text(
+                        surah[index]["nama"], // ambil karakter pertama text
+                        style: TextStyle(fontSize: 16.5)),
+                    subtitle: Text(
+                      (surah[index]["type"] == 'mekah'
+                              ? 'Makkiyah'
+                              : 'Madaniyah') +
+                          " • ${surah[index]["ayat"]} ayat",
+                      style: TextStyle(fontSize: 11.5),
+                    ),
                     leading: CircleAvatar(
                       backgroundColor: Colors.grey[700],
                       foregroundColor: Colors.white,

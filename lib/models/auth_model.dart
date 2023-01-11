@@ -1,4 +1,4 @@
-import 'dart:convert';
+//Libraries
 import 'package:hive/hive.dart';
 
 part 'auth_model.g.dart';

@@ -1,3 +1,10 @@
+const String baseUrl = 'https://api.uiniqu.cloud/api/v1';
+
+class auth {
+  static const login = '/login';
+  static const register = '/register';
+}
+
 const surah_list = [
   "Al Fatihah",
   "Al Baqarah",

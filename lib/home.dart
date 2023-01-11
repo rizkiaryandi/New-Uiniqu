@@ -26,6 +26,13 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     _tabController = new TabController(vsync: this, length: 3);
+    _tabController!.addListener(() {
+      setState(() {
+        _selectedNavbar = _tabController!.index;
+      });
+
+      // if(_tabController.)
+    });
   }
 
   @override
@@ -140,7 +147,10 @@ class _HomePageState extends State<HomePage>
               ),
             ),
           ),
-          title: Text(widget.title),
+          title: Text(
+            widget.title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
 
           elevation: 0,
           backgroundColor: Colors.transparent,

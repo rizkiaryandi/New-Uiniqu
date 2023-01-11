@@ -35,6 +35,7 @@ class _RegisterState extends State<Register> {
       'password': password,
       'name': name
     }).then((value) => {
+          FocusScope.of(context).requestFocus(new FocusNode()),
           DialogBuilder(context).hideOpenDialog(),
           toast.successToast(fToast, value['msg']),
           Navigator.pop(context, "toLogin"),

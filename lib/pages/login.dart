@@ -42,6 +42,7 @@ class _LoginState extends State<Login> {
       'username': username,
       'password': password
     }).then((value) => {
+          FocusScope.of(context).requestFocus(new FocusNode()),
           DialogBuilder(context).hideOpenDialog(),
           (value?.token != null
               ? {
